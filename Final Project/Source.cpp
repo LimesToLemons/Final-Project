@@ -5,6 +5,8 @@
 #include <time.h>
 #include <stdbool.h>
 
+// hi
+
 typedef struct card_s {
 	char color[10];
 	int value;
