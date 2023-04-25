@@ -162,7 +162,7 @@ int card_Count(card* thisnode, card* headNode) {
 		thisnode = thisnode->pt;
 	}
 	return count;
-	}
+}
 
 void center_Card(card* thisnode) {
 	if (thisnode->value == 2) {
@@ -180,7 +180,7 @@ void card_GetChecker(card* thisnode, card deck) {
 	deck = *thisnode;
 }
 
-void card_CreateLoopHand(card* thisNode, card* lastNode, card* thisNode2, card* lastNode2, card deck[], card* nextCard, int *counter, int loopNum) {
+void card_CreateLoopHand(card* thisNode, card* lastNode, card* thisNode2, card* lastNode2, card deck[], card* nextCard, int* counter, int loopNum) {
 	for (int i = 0; i < loopNum; i++) {
 		thisNode = (card*)malloc(sizeof(card));
 		thisNode2 = (card*)malloc(sizeof(card));
@@ -223,66 +223,77 @@ bool card_GetMatch(card* thisnode, int cardValue, int cardValue2) {
 void card_Release(card* thisnode, card* headnode, int card1, int card2, int twoOrone) {
 	card* tmp, * tmp2;
 	thisnode = headnode;
-	if (thisnode != NULL) {
-		if (twoOrone == 1) {
-			if (card1 == 1) {
-				tmp = headnode;
-				headnode = headnode->pt;
-				free(tmp);
+	if (twoOrone == 1) {
+		if (card1 == 1) {
+			tmp = headnode;
+			headnode = headnode->pt;
+			free(tmp);
+		}
+		else {
+			for (int i = 1; i < card1 - 1; ++i) {
+				thisnode = thisnode->pt;
+			}
+			if (thisnode->pt->pt == NULL) {
+				thisnode->pt = NULL;
 			}
 			else {
-				thisnode = headnode;
-				for (int i = 0; i < card1 - 2; ++i) {
-					thisnode = thisnode->pt;
-				}
 				tmp = thisnode->pt;
 				thisnode = thisnode->pt->pt;
 				free(tmp);
 			}
 		}
-		else if (twoOrone == 2) {
-			thisnode = headnode;
-			thisnode = headnode;
-			for (int i = 0; i < card2 - 2; ++i) {
-				thisnode = thisnode->pt;
-			}
+	}
+	else if (twoOrone == 2) {
+		for (int i = 1; i < card2 - 1; ++i) {
+			thisnode = thisnode->pt;
+		}
+		if (thisnode->pt->pt == NULL) {
+			thisnode->pt = NULL;
+		}
+		else if (thisnode->pt->pt != NULL) {
 			tmp = thisnode->pt;
-			if (thisnode->pt == NULL) {
-				thisnode = headnode;
-			}
-			else if (thisnode->pt->pt == NULL) {
-				thisnode = thisnode->pt;
-			}
+			thisnode = thisnode->pt->pt;
 			free(tmp);
-			if (card1 == 1) {
-				tmp2 = headnode;
-				headnode = headnode->pt;
-				free(tmp2);
-			}
-			else {
-				thisnode = headnode;
-				for (int i = 0; i < card1 - 2; ++i) {
+		}
+		if (card1 == 1) {
+			tmp2 = headnode;
+			headnode = headnode->pt;
+			free(tmp2);
+		}
+		else if (card1 != 1) {
+			thisnode = headnode;
+			for (int i = 1; i < card1 - 2; ++i) {
+				if (thisnode != NULL) {
 					thisnode = thisnode->pt;
 				}
+				//printf("%s %d", thisnode->color, thisnode->value);
+			}
+			if ((thisnode->pt->pt == NULL) && (thisnode->pt != NULL)) {
 				tmp2 = thisnode->pt;
-				if (thisnode->pt == NULL) {
-					thisnode = thisnode;
-				}
-				else if (thisnode->pt->pt == NULL) {
-					thisnode = thisnode->pt;
-				}
+				thisnode = headnode;
 				free(tmp2);
 			}
+			else if (thisnode->pt->pt != NULL) {
+				tmp2 = thisnode->pt;
+				thisnode = thisnode->pt->pt;
+				free(tmp2);
 			}
 		}
-		//thisnode = headnode;
-		card_Print(thisnode, headnode);
 	}
+	card_Print(thisnode, headnode);
+	thisnode = headnode;
+}
 
-void playSequence(card* thisnode, card* lastnode, card* centernode, card* centernodelast, card* centernodehead, card* headnode, card deck[], int* counter, int* turncount) {
+void cardPlacing(card* thisnode, card* lastnode, card* centernode, card* centernodehead, card* headnode, card deck[], int* counter, int* turncount) {
 	int howMany = 0, card1 = 0, card2 = 0, card1Val = 0, card2Val = 0, trueOrFalse = 0, currentCard = 1;
 	char comma;
 	card* tmp;
+	if (*turncount % 2 == 1) {
+		printf("Player 1's cards: ");
+	}
+	else {
+		printf("Player 2's cards: ");
+	}
 	card_Print(thisnode, headnode);
 	printf("Centerline ");
 	card_Print(centernode, centernodehead);
@@ -307,7 +318,7 @@ void playSequence(card* thisnode, card* lastnode, card* centernode, card* center
 	}
 	card1Val = thisnode->value;
 	thisnode = headnode;
-	for (int i = 0; i < card2 -1; ++i) {
+	for (int i = 0; i < card2 - 1; ++i) {
 		thisnode = thisnode->pt;
 	}
 	card2Val = thisnode->value;
@@ -322,11 +333,30 @@ void playSequence(card* thisnode, card* lastnode, card* centernode, card* center
 	if ((trueOrFalse == 1) && (*turncount % 2 == 1)) {
 		printf("Player 1's cards: ");
 		card_Release(thisnode, headnode, card1, card2, howMany);
+		thisnode = headnode;
+		while (thisnode != NULL) {
+			//printf("%s %d\n", thisnode->color, thisnode->value);
+			thisnode = thisnode->pt;
+		}
 	}
 	else if ((trueOrFalse == 1) && (*turncount % 2 == 0)) {
 		printf("Player 2's cards: ");
 		card_Release(thisnode, headnode, card1, card2, howMany);
 	}
+	lastnode = headnode;
+	if ((card_Count(centernode, headnode) != 0) && (trueOrFalse == 1)) {
+
+	}
+	thisnode = headnode;
+	//while (thisnode != NULL) {
+		//printf("%s %d\n", thisnode->color, thisnode->value);
+		//thisnode = thisnode->pt;
+//	}
+}
+
+void playSequence(card* thisnode, card* lastnode, card* centernode, card* centernodelast, card* centernodehead, card* headnode, card deck[], int* counter, int* turncount) {
+	cardPlacing(thisnode, lastnode, centernode, centernodehead, headnode, deck, counter, turncount);
+	*turncount = *turncount + 1;
 }
 
 int main() {
@@ -356,7 +386,7 @@ int main() {
 			printf("Error: File not found!");
 		}
 	}
-	
+
 	card* headObj = NULL, * headObj2 = NULL, * headObj3 = NULL;
 	card* currObj = NULL, * currObj2 = NULL, * currObj3 = NULL;
 	card* lastObj = NULL, * lastObj2 = NULL, * lastObj3 = NULL;
@@ -385,12 +415,8 @@ int main() {
 		if (centerCardCount < 2) {
 			card_CreateLoop(headObj3, lastObj3, DeckOfCards, NULL, &counter, (2 - centerCardCount));
 		}
-		if (turnCount % 2 == 1) {
-			printf("Player 1's cards: ");
-			playSequence(currObj, lastObj, currObj3, lastObj3, headObj3, headObj, DeckOfCards, &counter, &turnCount);
-			centerCardCount = 0;
-		}
-
+		playSequence(currObj, lastObj, currObj3, lastObj3, headObj3, headObj, DeckOfCards, &counter, &turnCount);
+		centerCardCount = 0;
 	}
 
 	/*if ((counter > 0) && (playerCardCount1 > 0) && (playerCardCount2 > 0)) {
