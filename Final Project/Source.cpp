@@ -94,9 +94,9 @@ void randomizeDeck(card deck[]) {
 	srand((int)time(0));
 	card temp;
 	char hash[2] = "#", two[15] = "Multi-Color 2";
-	for (int i = 0; i < 1000; i++) {
+	for (int i = 0; i < 5000; i++) {
 		int num1 = rand() % 108, num2 = rand() % 108; // initializes random number from 0-108 representing the array values to swap it
-		temp = deck[num1]; // runs the loop 1000 times to ensure cards are shuffled
+		temp = deck[num1]; // runs the loop 5000 times to ensure cards are shuffled
 		deck[num1] = deck[num2];
 		deck[num2] = temp;
 	}
@@ -199,25 +199,34 @@ void card_CreateLoop(card* thisNode, card* lastNode, card* headnode, card deck[]
 	}
 }
 
-bool card_GetMatch(card* thisnode, int cardValue, int cardValue2) {
+bool card_GetMatch(card* thisnode, int cardValue, int cardValue2, char card1Col[], char card2Col[], int* singleMatch, int* doubleMatch) {
 	int trueOrNah = 0;
-	if (thisnode->value == 11) {
-		trueOrNah = 1;
-	}
-	else if (thisnode->value != 11) {
-		if ((cardValue == 11) || (cardValue2 == 11)) {
-			if ((cardValue == 11) && (cardValue2 == 11)) {
-				trueOrNah = 1;
-			}
-			else if ((cardValue + cardValue2) - 11 < thisnode->value) {
-				trueOrNah = 1;
-			}
-		}
-		else if ((cardValue + cardValue2) == thisnode->value) {
-			trueOrNah = 1;
-		}
-	}
+
 	return trueOrNah;
+}
+
+void card_ReleaseCenter(card** thisnode, card** headnode, card** lastnode, int* card1) {
+	card* tmp{};
+	if (*card1 == 1) {
+		tmp = *headnode;
+		*headnode = (*headnode)->pt;
+		free(tmp);
+		*card1 = 1;
+	}
+	else if (*card1 != 1) {
+		*thisnode = *headnode;
+		for (int i = 1; i < *card1 - 1; ++i) {
+			*thisnode = (*thisnode)->pt;
+		}
+		tmp = (*thisnode)->pt;
+		(*thisnode)->pt = (*thisnode)->pt->pt;
+		free(tmp);
+	}
+	*thisnode = *headnode;
+	while ((*thisnode)->pt != NULL) {
+		*thisnode = (*thisnode)->pt;
+	}
+	*lastnode = *thisnode;
 }
 
 void card_Release(card** thisnode, card** headnode, card** lastnode, int card1) {
@@ -226,6 +235,7 @@ void card_Release(card** thisnode, card** headnode, card** lastnode, int card1) 
 		tmp = *headnode;
 		*headnode = (*headnode)->pt;
 		free(tmp);
+		card1 = 1;
 	}
 	else if (card1 != 1) {
 		*thisnode = *headnode;
@@ -241,6 +251,19 @@ void card_Release(card** thisnode, card** headnode, card** lastnode, int card1) 
 		*thisnode = (*thisnode)->pt;
 	}
 	*lastnode = *thisnode;
+}
+
+card* card_GetCard(card* thisnode, card* headnode, int card1) {
+	thisnode = headnode;
+	card* tmp;
+	for (int i = 1; i < card1; ++i) {
+		if (thisnode->pt != NULL) {
+			thisnode = thisnode->pt;
+		}
+	}
+	tmp = thisnode;
+	thisnode = headnode;
+	return tmp;
 }
 
 int main() {
@@ -294,8 +317,9 @@ int main() {
 	playerCardCount1 = card_Count(currObj, headObj);
 	playerCardCount2 = card_Count(currObj2, headObj2);
 	currObj3 = headObj3;
-	while ((centerCardCount > 0) && (playerCardCount1 > 0) && (playerCardCount2 > 0)) {
-		int howMany = 0, card1 = 0, card2 = 0, card1Val = 0, card2Val = 0, trueOrFalse = 0;
+	while ((centerCardCount >= 0) && (playerCardCount1 > 0) && (playerCardCount2 > 0)) {
+		int howMany = 0, card1 = 0, card2 = 0, card1Val = 0, card2Val = 0, trueOrFalse = 0, stop = 0, singleMatch = 0, doubleMatch = 0;
+		char card1Col[10], card2Col[10];
 		char comma;
 		while (turnCount % 2 == 1) {
 			printf("Player 1's cards: ");
@@ -308,7 +332,12 @@ int main() {
 					currObj3 = currObj3->pt;
 				}
 			}
-			printf("How many cards do you want to play on %s %d:", currObj3->color, currObj3->value);
+			if (currObj3->value == 11) {
+				printf("How many cards do you want to play on %s # (0, 1, or 2)", currObj3->color);
+			}
+			else {
+				printf("How many cards do you want to play on %s %d (0, 1, or 2):", currObj3->color, currObj3->value);
+			}
 			scanf(" %d", &howMany);
 			if (howMany == 1) {
 				printf("Select a card from 1-%d:", card_Count(currObj, headObj));
@@ -325,15 +354,17 @@ int main() {
 					currObj = currObj->pt;
 				}
 				card1Val = currObj->value;
+				strcpy(card1Col, currObj->color);
 				currObj = headObj;
 				for (int i = 0; i < card2 - 1; ++i) {
 					currObj = currObj->pt;
 				}
 				card2Val = currObj->value;
+				strcpy(card2Col, currObj->color);
 				if (howMany == 1) {
 					card2Val = 0;
 				}
-				trueOrFalse = card_GetMatch(currObj3, card1Val, card2Val);
+				trueOrFalse = card_GetMatch(currObj3, card1Val, card2Val, card1Col, card2Col, &singleMatch, &doubleMatch);
 				if (trueOrFalse == 0) {
 					printf("The selection does not total to the center row card. Select again\n");
 				}
@@ -343,22 +374,114 @@ int main() {
 						currObj = headObj;
 						card_Release(&currObj, &headObj, &lastObj, card2);
 						card_Release(&currObj, &headObj, &lastObj, card1);
-						card_Release(&currObj3, &headObj3, &lastObj3, currentCard - 1);
+						if (card_Count(currObj3, headObj3) == 1) {
+							turnCount = turnCount + 1;
+							printf("There are no more center cards, ending turn.\n");
+							if ((doubleMatch == 0) && (singleMatch == 0)) {
+								card_CreateLoop(currObj3, lastObj3, headObj3, DeckOfCards, NULL, &counter, 1);
+								card_ReleaseCenter(&currObj3, &headObj3, &lastObj3, &currentCard);
+							}
+							else {
+								if (singleMatch != 0) {
+									card temp[1];
+									int tmp = 0;
+									for (int i = singleMatch; i > 0; i--) {
+										printf("You single matched %d card(s). Select a card from 1-%d to put in the center.\n", singleMatch, card_Count(currObj, headObj));
+										printf("Player 1's hand: "), card_Print(currObj, headObj);
+										scanf("%d", &card1);
+										strcpy(temp[0].color, card_GetCard(currObj, headObj, card1)->color), temp[0].value = card_GetCard(currObj, headObj, card1)->value;
+										card_Release(&currObj, &headObj, &lastObj, card_Count(currObj, headObj));
+										card_LastNode(&currObj3, &headObj3, &lastObj3), card_CreateLoop(currObj3, lastObj3, headObj3, temp, NULL, &tmp, 1);
+										card_LastNode(&currObj, &headObj, &lastObj), card_LastNode(&currObj3, &headObj3, &lastObj3);
+									}
+								}
+								if (doubleMatch != 0) {
+									card temp[1];
+									int tmp = 0;
+									for (int i = doubleMatch; i > 0; i--) {
+										printf("You double matched %d card(s). Select a card from 1-%d to put in the center.\n", doubleMatch, card_Count(currObj, headObj));
+										printf("Player 1's hand: "), card_Print(currObj, headObj);
+										scanf("%d", &card1);
+										strcpy(temp[0].color, card_GetCard(currObj, headObj, card1)->color), temp[0].value = card_GetCard(currObj, headObj, card1)->value;
+										card_Release(&currObj, &headObj, &lastObj, card_Count(currObj, headObj));
+										card_LastNode(&currObj3, &headObj3, &lastObj3), card_CreateLoop(currObj3, lastObj3, headObj3, temp, NULL, &tmp, 1);
+										card_LastNode(&currObj, &headObj, &lastObj), card_LastNode(&currObj3, &headObj3, &lastObj3);
+									}
+									for (int i = doubleMatch; i > 0; --i) {
+										card_CreateLoop(currObj2, lastObj2, headObj2, DeckOfCards, NULL, &counter, 1);
+									}
+								}
+							}
+							card_ReleaseCenter(&currObj3, &headObj3, &lastObj3, &currentCard);
+						}
+						else {
+							card_ReleaseCenter(&currObj3, &headObj3, &lastObj3, &currentCard);
+						}
 						drawCount = drawCount + 1;
-						//card_Print(currObj, headObj);
 					}
 					else if (howMany == 1) {
 						currObj = headObj;
 						card_Release(&currObj, &headObj, &lastObj, card1);
-						card_Release(&currObj3, &headObj3, &lastObj3, currentCard - 1);
+						if (card_Count(currObj3, headObj3) == 1) {
+							turnCount = turnCount + 1;
+							printf("There are no more center cards, ending turn.\n");
+							if ((doubleMatch == 0) && (singleMatch == 0)) {
+								printf("%d %d\n", doubleMatch, singleMatch);
+								card_CreateLoop(currObj3, lastObj3, headObj3, DeckOfCards, NULL, &counter, 1);
+								card_ReleaseCenter(&currObj3, &headObj3, &lastObj3, &currentCard);
+							}
+							else {
+								if (singleMatch != 0) {
+									card temp[1];
+									int tmp = 0;
+									for (int i = singleMatch; i > 0; i--) {
+										printf("You single matched %d card(s). Select a card from 1-%d to put in the center.\n", singleMatch, card_Count(currObj, headObj));
+										printf("Player 1's hand: "), card_Print(currObj, headObj);
+										scanf("%d", &card1);
+										strcpy(temp[0].color, card_GetCard(currObj, headObj, card1)->color), temp[0].value = card_GetCard(currObj, headObj, card1)->value;
+										card_Release(&currObj, &headObj, &lastObj, card_Count(currObj, headObj));
+										card_LastNode(&currObj3, &headObj3, &lastObj3), card_CreateLoop(currObj3, lastObj3, headObj3, temp, NULL, &tmp, 1);
+										card_LastNode(&currObj, &headObj, &lastObj), card_LastNode(&currObj3, &headObj3, &lastObj3);
+									}
+									for (int i = singleMatch; i > 0; --i) {
+										card_CreateLoop(currObj2, lastObj2, headObj2, DeckOfCards, NULL, &counter, 1);
+									}
+								}
+								if (doubleMatch != 0) {
+									card temp[1];
+									int tmp = 0;
+									for (int i = doubleMatch; i > 0; i--) {
+										printf("You double matched %d card(s). Select a card from 1-%d to put in the center.\n", doubleMatch, card_Count(currObj, headObj));
+										printf("Player 1's hand: "), card_Print(currObj, headObj);
+										scanf("%d", &card1);
+										strcpy(temp[0].color, card_GetCard(currObj, headObj, card1)->color), temp[0].value = card_GetCard(currObj, headObj, card1)->value;
+										card_Release(&currObj, &headObj, &lastObj, card_Count(currObj, headObj));
+										card_LastNode(&currObj3, &headObj3, &lastObj3), card_CreateLoop(currObj3, lastObj3, headObj3, temp, NULL, &tmp, 1);
+										card_LastNode(&currObj, &headObj, &lastObj), card_LastNode(&currObj3, &headObj3, &lastObj3);
+									}
+									for (int i = doubleMatch; i > 0; --i) {
+										card_CreateLoop(currObj2, lastObj2, headObj2, DeckOfCards, NULL, &counter, 1);
+									}
+								}
+							}
+							card_ReleaseCenter(&currObj3, &headObj3, &lastObj3, &currentCard);
+						}
+						else {
+							card_ReleaseCenter(&currObj3, &headObj3, &lastObj3, &currentCard);
+						}
 						drawCount = drawCount + 1;
 					}
 					if (card_Count(currObj3, headObj3) == 1) {
 						if (currentCard > card_Count(currObj3, headObj3)) {
 							turnCount = turnCount + 1;
 						}
-						else {
-							currentCard = 1;
+						else if (card_Count(currObj3, headObj3) != 1) {
+							if (currObj3 = headObj3) {
+								currentCard = 1;
+							}
+							else {
+								currentCard = currentCard + 1;
+							}
 						}
 					}
 					else if (card_Count(currObj3, headObj3) != 1) {
@@ -375,7 +498,6 @@ int main() {
 					currentCard = 1;
 				}
 			}
-			//printf("%d %d\n", card_Count(currObj3, headObj3), currentCard);
 		}
 		if (drawCount == 0) {
 			card_LastNode(&currObj, &headObj, &lastObj);
@@ -396,10 +518,23 @@ int main() {
 		drawCount = 0;
 		printf("Player 1's hand: "), card_Print(currObj, headObj);
 		printf("Player 2's turn.\n");
-		if (card_Count(currObj3, headObj3) < 2) {
-			card_CreateLoop(currObj3, lastObj3, headObj3, DeckOfCards, NULL, &counter, (2 - card_Count(currObj3, headObj3)));
+		if ((card_Count(currObj3, headObj3) < 2)) {
+			if (card_Count(currObj3, headObj3) == 0) {
+				card_Create(headObj3, DeckOfCards, NULL, counter);
+				lastObj3 = headObj3;
+				counter = counter - 1;
+				card_CreateLoop(currObj3, lastObj3, headObj3, DeckOfCards, NULL, &counter, 1);
+			}
+			else {
+				card_CreateLoop(currObj3, lastObj3, headObj3, DeckOfCards, NULL, &counter, (2 - card_Count(currObj3, headObj3)));
+			}
 		}
 		centerCardCount = card_Count(currObj3, headObj3);
+		singleMatch = 0;
+		doubleMatch = 0;
+		currentCard = 1;
+
+
 		while (turnCount % 2 == 0) {
 			printf("Player 2's cards: ");
 			card_Print(currObj2, headObj2);
@@ -411,7 +546,12 @@ int main() {
 					currObj3 = currObj3->pt;
 				}
 			}
-			printf("How many cards do you want to play on %s %d:", currObj3->color, currObj3->value);
+			if (currObj3->value == 11) {
+				printf("How many cards do you want to play on %s # (0, 1, or 2)", currObj3->color);
+			}
+			else {
+				printf("How many cards do you want to play on %s %d (0, 1, or 2):", currObj3->color, currObj3->value);
+			}
 			scanf(" %d", &howMany);
 			if (howMany == 1) {
 				printf("Select a card from 1-%d:", card_Count(currObj2, headObj2));
@@ -428,15 +568,17 @@ int main() {
 					currObj2 = currObj2->pt;
 				}
 				card1Val = currObj2->value;
+				strcpy(card1Col, currObj2->color);
 				currObj2 = headObj2;
 				for (int i = 0; i < card2 - 1; ++i) {
 					currObj2 = currObj2->pt;
 				}
 				card2Val = currObj2->value;
+				strcpy(card2Col, currObj2->color);
 				if (howMany == 1) {
 					card2Val = 0;
 				}
-				trueOrFalse = card_GetMatch(currObj3, card1Val, card2Val);
+				trueOrFalse = card_GetMatch(currObj3, card1Val, card2Val, card1Col, card2Col, &singleMatch, &doubleMatch);
 				if (trueOrFalse == 0) {
 					printf("The selection does not total to the center row card. Select again\n");
 				}
@@ -445,21 +587,113 @@ int main() {
 						currObj2 = headObj2;
 						card_Release(&currObj2, &headObj2, &lastObj2, card2);
 						card_Release(&currObj2, &headObj2, &lastObj2, card1);
-						card_Release(&currObj3, &headObj3, &lastObj3, currentCard - 1);
+						if (card_Count(currObj3, headObj3) == 1) {
+							turnCount = turnCount + 1;
+							printf("There are no more center cards, ending turn.\n");
+							if ((doubleMatch == 0) && (singleMatch == 0)) {
+								card_CreateLoop(currObj3, lastObj3, headObj3, DeckOfCards, NULL, &counter, 1);
+								card_ReleaseCenter(&currObj3, &headObj3, &lastObj3, &currentCard);
+							}
+							else {
+								if (singleMatch != 0) {
+									card temp[1];
+									int tmp = 0;
+									for (int i = singleMatch; i > 0; i--) {
+										printf("You single matched %d card(s). Select a card from 1-%d to put in the center.\n", singleMatch, card_Count(currObj2, headObj2));
+										printf("Player 2's hand: "), card_Print(currObj2, headObj2);
+										scanf("%d", &card1);
+										strcpy(temp[0].color, card_GetCard(currObj2, headObj2, card1)->color), temp[0].value = card_GetCard(currObj2, headObj2, card1)->value;
+										card_Release(&currObj2, &headObj2, &lastObj2, card_Count(currObj2, headObj2));
+										card_LastNode(&currObj3, &headObj3, &lastObj3), card_CreateLoop(currObj3, lastObj3, headObj3, temp, NULL, &tmp, 1);
+										card_LastNode(&currObj2, &headObj2, &lastObj2), card_LastNode(&currObj3, &headObj3, &lastObj3);
+									}
+								}
+								if (doubleMatch != 0) {
+									card temp[1];
+									int tmp = 0;
+									for (int i = doubleMatch; i > 0; i--) {
+										printf("You double matched %d card(s). Select a card from 1-%d to put in the center.\n", doubleMatch, card_Count(currObj2, headObj2));
+										printf("Player 2's hand: "), card_Print(currObj2, headObj2);
+										scanf("%d", &card1);
+										strcpy(temp[0].color, card_GetCard(currObj2, headObj2, card1)->color), temp[0].value = card_GetCard(currObj2, headObj2, card1)->value;
+										card_Release(&currObj2, &headObj2, &lastObj2, card_Count(currObj2, headObj2));
+										card_LastNode(&currObj3, &headObj3, &lastObj3), card_CreateLoop(currObj3, lastObj3, headObj3, temp, NULL, &tmp, 1);
+										card_LastNode(&currObj2, &headObj2, &lastObj2), card_LastNode(&currObj3, &headObj3, &lastObj3);
+									}
+									for (int i = doubleMatch; i > 0; --i) {
+										card_CreateLoop(currObj2, lastObj2, headObj2, DeckOfCards, NULL, &counter, 1);
+									}
+								}
+							}
+							card_ReleaseCenter(&currObj3, &headObj3, &lastObj3, &currentCard);
+						}
+						else {
+							card_ReleaseCenter(&currObj3, &headObj3, &lastObj3, &currentCard);
+						}
 						drawCount = drawCount + 1;
 					}
 					else if (howMany == 1) {
 						currObj2 = headObj2;
 						card_Release(&currObj2, &headObj2, &lastObj2, card1);
-						card_Release(&currObj3, &headObj3, &lastObj3, currentCard - 1);
+						if (card_Count(currObj3, headObj3) == 1) {
+							turnCount = turnCount + 1;
+							printf("There are no more center cards, ending turn.\n");
+							if ((doubleMatch == 0) && (singleMatch == 0)) {
+								card_CreateLoop(currObj3, lastObj3, headObj3, DeckOfCards, NULL, &counter, 1);
+								card_ReleaseCenter(&currObj3, &headObj3, &lastObj3, &currentCard);
+							}
+							else {
+								if (singleMatch != 0) {
+									card temp[1];
+									int tmp = 0;
+									for (int i = singleMatch; i > 0; i--) {
+										printf("You single matched %d card(s). Select a card from 1-%d to put in the center.\n", singleMatch, card_Count(currObj2, headObj2));
+										printf("Player 2's hand: "), card_Print(currObj2, headObj2);
+										scanf("%d", &card1);
+										strcpy(temp[0].color, card_GetCard(currObj2, headObj2, card1)->color), temp[0].value = card_GetCard(currObj2, headObj2, card1)->value;
+										card_Release(&currObj2, &headObj2, &lastObj2, card_Count(currObj2, headObj2));
+										card_LastNode(&currObj3, &headObj3, &lastObj3), card_CreateLoop(currObj3, lastObj3, headObj3, temp, NULL, &tmp, 1);
+										card_LastNode(&currObj2, &headObj2, &lastObj2), card_LastNode(&currObj3, &headObj3, &lastObj3);
+									}
+									for (int i = singleMatch; i > 0; --i) {
+										card_CreateLoop(currObj, lastObj, headObj, DeckOfCards, NULL, &counter, 1);
+									}
+								}
+								if (doubleMatch != 0) {
+									card temp[1];
+									int tmp = 0;
+									for (int i = doubleMatch; i > 0; i--) {
+										printf("You double matched %d card(s). Select a card from 1-%d to put in the center.\n", doubleMatch, card_Count(currObj2, headObj2));
+										printf("Player 2's hand: "), card_Print(currObj2, headObj2);
+										scanf("%d", &card1);
+										strcpy(temp[0].color, card_GetCard(currObj2, headObj2, card1)->color), temp[0].value = card_GetCard(currObj2, headObj2, card1)->value;
+										card_Release(&currObj2, &headObj2, &lastObj2, card_Count(currObj2, headObj2));
+										card_LastNode(&currObj3, &headObj3, &lastObj3), card_CreateLoop(currObj3, lastObj3, headObj3, temp, NULL, &tmp, 1);
+										card_LastNode(&currObj2, &headObj2, &lastObj2), card_LastNode(&currObj3, &headObj3, &lastObj3);
+									}
+									for (int i = doubleMatch; i > 0; --i) {
+										card_CreateLoop(currObj, lastObj, headObj, DeckOfCards, NULL, &counter, 1);
+									}
+								}
+							}
+							card_ReleaseCenter(&currObj3, &headObj3, &lastObj3, &currentCard);
+						}
+						else {
+							card_ReleaseCenter(&currObj3, &headObj3, &lastObj3, &currentCard);
+						}
 						drawCount = drawCount + 1;
 					}
 					if (card_Count(currObj3, headObj3) == 1) {
 						if (currentCard > card_Count(currObj3, headObj3)) {
 							turnCount = turnCount + 1;
 						}
-						else {
-							currentCard = 1;
+						else if (card_Count(currObj3, headObj3) != 1) {
+							if (currObj3 = headObj3) {
+								currentCard = 1;
+							}
+							else {
+								currentCard = currentCard + 1;
+							}
 						}
 					}
 					else if (card_Count(currObj3, headObj3) != 1) {
@@ -476,7 +710,6 @@ int main() {
 					currentCard = 1;
 				}
 			}
-			//printf("%d %d\n", card_Count(currObj3, headObj3), currentCard);
 		}
 		if (drawCount == 0) {
 			card_LastNode(&currObj2, &headObj2, &lastObj2);
@@ -493,13 +726,24 @@ int main() {
 				card_LastNode(&currObj3, &headObj3, &lastObj3), card_CreateLoop(currObj3, lastObj3, headObj3, temp, NULL, &tmp, 1);
 				card_LastNode(&currObj2, &headObj2, &lastObj2), card_LastNode(&currObj3, &headObj3, &lastObj3);
 			}
-			drawCount = 0;
-			printf("Player 2's hand: "), card_Print(currObj2, headObj2);
-			printf("Player 1's turn.\n");
-			if (card_Count(currObj3, headObj3) < 2) {
+		}
+		drawCount = 0;
+		printf("Player 2's hand: "), card_Print(currObj2, headObj2);
+		printf("Player 1's turn.\n");
+		if ((card_Count(currObj3, headObj3) < 2)) {
+			if (card_Count(currObj3, headObj3) == 0) {
+				card_Create(headObj3, DeckOfCards, NULL, counter);
+				lastObj3 = headObj3;
+				counter = counter - 1;
+				card_CreateLoop(currObj3, lastObj3, headObj3, DeckOfCards, NULL, &counter, 1);
+			}
+			else {
 				card_CreateLoop(currObj3, lastObj3, headObj3, DeckOfCards, NULL, &counter, (2 - card_Count(currObj3, headObj3)));
 			}
-			centerCardCount = card_Count(currObj3, headObj3);
+		}
+		centerCardCount = card_Count(currObj3, headObj3);
+		singleMatch = 0;
+		doubleMatch = 0;
+		currentCard = 1;
 		}
 	}
-}
