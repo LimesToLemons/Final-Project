@@ -5,6 +5,12 @@
 #include <time.h>
 #include <stdbool.h>
 
+#define RED "\x1b[31m"
+#define GREEN "\x1b[32m"
+#define YELLOW "\x1b[33m"
+#define BLUE "\x1b[34m"
+#define RESET "\x1b[0m"
+
 // hi
 
 typedef struct card_s {
@@ -132,24 +138,69 @@ void card_Print(card* thisnode, card* headNode) {
 	while (thisnode != NULL) {
 		if (thisnode->pt == NULL) {
 			if (thisnode->value == 2) {
-				printf("anycolor %d", thisnode->value);
+				printf("anycolor 2");
 			}
 			else if (thisnode->value == 11) {
-				printf("%s #", thisnode->color);
+				if (strcmp(thisnode->color, "green") == 0) {
+					printf(RESET GREEN "%s #", thisnode->color);
+				}
+				else if (strcmp(thisnode->color, "red") == 0) {
+					printf(RESET RED "%s #", thisnode->color);
+				}
+				else if (strcmp(thisnode->color, "blue") == 0) {
+					printf(RESET BLUE "%s #", thisnode->color);
+				}
+				else if (strcmp(thisnode->color, "yellow") == 0) {
+					printf(RESET YELLOW "%s #", thisnode->color);
+				}
 			}
 			else {
-				printf("%s %d", thisnode->color, thisnode->value);
+				if (strcmp(thisnode->color, "green") == 0) {
+					printf(RESET GREEN "%s %d", thisnode->color, thisnode->value);
+				}
+				else if (strcmp(thisnode->color, "red") == 0) {
+					printf(RESET RED "%s %d", thisnode->color, thisnode->value);
+				}
+				else if (strcmp(thisnode->color, "blue") == 0) {
+					printf(RESET BLUE "%s %d", thisnode->color, thisnode->value);
+				}
+				else if (strcmp(thisnode->color, "yellow") == 0) {
+					printf(RESET YELLOW "%s %d", thisnode->color, thisnode->value);
+				}
 			}
 		}
 		else if (thisnode->value == 2) {
-			printf("anycolor %d, ", thisnode->value);
+			printf("anycolor 2, ");
 		}
 		else if (thisnode->value == 11) {
-			printf("%s #, ", thisnode->color);
+			if (strcmp(thisnode->color, "green") == 0) {
+				printf(RESET GREEN "%s #, ", thisnode->color);
+			}
+			else if (strcmp(thisnode->color, "red") == 0) {
+				printf(RESET RED "%s #, ", thisnode->color);
+			}
+			else if (strcmp(thisnode->color, "blue") == 0) {
+				printf(RESET BLUE "%s #, ", thisnode->color);
+			}
+			else if (strcmp(thisnode->color, "yellow") == 0) {
+				printf(RESET YELLOW "%s #, ", thisnode->color);
+			}
 		}
 		else {
-			printf("%s %d, ", thisnode->color, thisnode->value);
+			if (strcmp(thisnode->color, "green") == 0) {
+				printf(RESET GREEN "%s %d, ", thisnode->color, thisnode->value);
+			}
+			else if (strcmp(thisnode->color, "red") == 0) {
+				printf(RESET RED "%s %d, ", thisnode->color, thisnode->value);
+			}
+			else if (strcmp(thisnode->color, "blue") == 0) {
+				printf(RESET BLUE "%s %d, ", thisnode->color, thisnode->value);
+			}
+			else if (strcmp(thisnode->color, "yellow") == 0) {
+				printf(RESET YELLOW "%s %d, ", thisnode->color, thisnode->value);
+			}
 		}
+		printf(RESET);
 		thisnode = thisnode->pt;
 	}
 	thisnode = headNode;
@@ -520,14 +571,37 @@ int main() {
 				}
 			}
 			if (currObj3->value == 11) {
-				printf("How many cards do you want to play on %s # (0, 1, or 2):", currObj3->color);
+				if (strcmp(currObj3->color, "green") == 0) {
+					printf(RESET "How many cards do you want to play on " GREEN "%s # " RESET "(0, 1, or 2):", currObj3->color);
+				}
+				else if (strcmp(currObj3->color, "blue") == 0) {
+					printf(RESET "How many cards do you want to play on " BLUE"%s # " RESET "(0, 1, or 2):", currObj3->color);
+				}
+				else if (strcmp(currObj3->color, "yellow") == 0) {
+					printf(RESET "How many cards do you want to play on " YELLOW "%s # " RESET "(0, 1, or 2):", currObj3->color);
+				}
+				else if (strcmp(currObj3->color, "red") == 0) {
+					printf(RESET "How many cards do you want to play on " RED "%s # " RESET "(0, 1, or 2):", currObj3->color);
+				}
 			}
 			else if (currObj3->value == 2) {
-				printf("How many cards do you want to play on anycolor 2 (0, 1, or 2):");
+				printf(RESET "How many cards do you want to play on anycolor 2 (0, 1, or 2):");
 			}
 			else {
-				printf("How many cards do you want to play on %s %d (0, 1, or 2):", currObj3->color, currObj3->value);
+				if (strcmp(currObj3->color, "green") == 0) {
+					printf(RESET "How many cards do you want to play on " GREEN "%s %d " RESET "(0, 1, or 2)", currObj3->color, currObj3->value);
+				}
+				else if (strcmp(currObj3->color, "blue") == 0) {
+					printf(RESET "How many cards do you want to play on " BLUE "%s %d " RESET "(0, 1, or 2)", currObj3->color, currObj3->value);
+				}
+				else if (strcmp(currObj3->color, "yellow") == 0) {
+					printf(RESET "How many cards do you want to play on " YELLOW "%s %d " RESET "(0, 1, or 2)", currObj3->color, currObj3->value);
+				}
+				else if (strcmp(currObj3->color, "red") == 0) {
+					printf(RESET "How many cards do you want to play on " RED "%s %d " RESET "(0, 1, or 2)", currObj3->color, currObj3->value);
+				}
 			}
+			printf(RESET);
 			scanf(" %d", &howMany);
 			if (howMany == 1) {
 				printf("Select a card from 1-%d:", card_Count(currObj, headObj));
@@ -779,14 +853,37 @@ int main() {
 				}
 			}
 			if (currObj3->value == 11) {
-				printf("How many cards do you want to play on %s # (0, 1, or 2):", currObj3->color);
+				if (strcmp(currObj3->color, "green") == 0) {
+					printf(RESET "How many cards do you want to play on " GREEN "%s # " RESET "(0, 1, or 2):", currObj3->color);
+				}
+				else if (strcmp(currObj3->color, "blue") == 0) {
+					printf(RESET "How many cards do you want to play on " BLUE"%s # " RESET "(0, 1, or 2):", currObj3->color);
+				}
+				else if (strcmp(currObj3->color, "yellow") == 0) {
+					printf(RESET "How many cards do you want to play on " YELLOW "%s # " RESET "(0, 1, or 2):", currObj3->color);
+				}
+				else if (strcmp(currObj3->color, "red") == 0) {
+					printf(RESET "How many cards do you want to play on " RED "%s # " RESET "(0, 1, or 2):", currObj3->color);
+				}
 			}
 			else if (currObj3->value == 2) {
-				printf("How many cards do you want to play on anycolor 2 (0, 1, or 2):");
+				printf(RESET "How many cards do you want to play on anycolor 2 (0, 1, or 2):");
 			}
 			else {
-				printf("How many cards do you want to play on %s %d (0, 1, or 2):", currObj3->color, currObj3->value);
+				if (strcmp(currObj3->color, "green") == 0) {
+					printf(RESET "How many cards do you want to play on " GREEN "%s %d " RESET "(0, 1, or 2)", currObj3->color, currObj3->value);
+				}
+				else if (strcmp(currObj3->color, "blue") == 0) {
+					printf(RESET "How many cards do you want to play on " BLUE "%s %d " RESET "(0, 1, or 2)", currObj3->color, currObj3->value);
+				}
+				else if (strcmp(currObj3->color, "yellow") == 0) {
+					printf(RESET "How many cards do you want to play on " YELLOW "%s %d " RESET "(0, 1, or 2)", currObj3->color, currObj3->value);
+				}
+				else if (strcmp(currObj3->color, "red") == 0) {
+					printf(RESET "How many cards do you want to play on " RED "%s %d " RESET "(0, 1, or 2)", currObj3->color, currObj3->value);
+				}
 			}
+			printf(RESET);
 			scanf(" %d", &howMany);
 			if (howMany == 1) {
 				printf("Select a card from 1-%d:", card_Count(currObj2, headObj2));
