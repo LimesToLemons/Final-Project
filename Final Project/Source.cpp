@@ -264,6 +264,9 @@ bool card_GetMatch(card* thisnode, int cardValue, int cardValue2, char card1Col[
 	if (howMany == 1) {
 		if (thisnode->value == 11) {
 			trueOrNah = 1;
+      if (cardValue == 2) {
+        *singleMatch = *singleMatch + 1;
+      }
 		}
 		else if ((cardValue == 2) && (thisnode->value == 2)) {
 			trueOrNah = 1;
@@ -304,6 +307,9 @@ bool card_GetMatch(card* thisnode, int cardValue, int cardValue2, char card1Col[
 		}
 		if ((cardValue + cardValue2) == thisnode->value) {
 			trueOrNah = 1;
+      if (thisnode->value == 2) {
+        *doubleMatch = *doubleMatch + 1;
+      }
 		}
 		if ((cardValue != 2) && (cardValue2 != 2)) {
 			if ((strcmp(card1Col, thisnode->color) == 0) && (strcmp(card2Col, thisnode->color)) == 0) {
