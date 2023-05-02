@@ -646,7 +646,7 @@ int main() {
 									currentCard = 2;
 								}
 							}
-							card_Matches(&currObj, &headObj, &lastObj, &currObj3, &headObj3, &lastObj3, &currObj2, &headObj2, &lastObj2, DeckOfCards, &singleMatch, &doubleMatch, &counter, &currentCard, turnCount, howMany, playerCount);
+							card_Matches(&currObj, &headObj, &lastObj, &currObj3, &headObj3, &lastObj3, &currObj2, &headObj2, &lastObj2, DeckOfCards, &singleMatch, &doubleMatch, &counter, &currentCard, turnCount + 1, howMany, playerCount);
 							if (doubleMatch > 0) {
 								printf("Dealing %d card(s) to other players.\n", doubleMatch);
 								card_Draw(currObj2, headObj2, lastObj2, DeckOfCards, &counter, &doubleMatch);
@@ -955,7 +955,7 @@ int main() {
 									currentCard = 2;
 								}
 							}
-							card_Matches(&currObj2, &headObj2, &lastObj2, &currObj3, &headObj3, &lastObj3, &currObj, &headObj, &lastObj, DeckOfCards, &singleMatch, &doubleMatch, &counter, &currentCard, turnCount, howMany, playerCount);
+							card_Matches(&currObj2, &headObj2, &lastObj2, &currObj3, &headObj3, &lastObj3, &currObj, &headObj, &lastObj, DeckOfCards, &singleMatch, &doubleMatch, &counter, &currentCard, turnCount + 1, howMany, playerCount);
 							if (doubleMatch > 0) {
 								printf("Dealing %d card(s) to other players.\n", doubleMatch);
 								card_Draw(currObj, headObj, lastObj, DeckOfCards, &counter, &doubleMatch);
@@ -1271,7 +1271,7 @@ int main() {
 										currentCard = 2;
 									}
 								}
-								card_Matches(&currObj4, &headObj4, &lastObj4, &currObj3, &headObj3, &lastObj3, &currObj, &headObj, &lastObj, DeckOfCards, &singleMatch, &doubleMatch, &counter, &currentCard, turnCount, howMany, playerCount);
+								card_Matches(&currObj4, &headObj4, &lastObj4, &currObj3, &headObj3, &lastObj3, &currObj, &headObj, &lastObj, DeckOfCards, &singleMatch, &doubleMatch, &counter, &currentCard, turnCount + 1, howMany, playerCount);
 								if (doubleMatch > 0) {
 									printf("Dealing %d card(s) to other players.\n", doubleMatch);
 									card_Draw(currObj, headObj, lastObj, DeckOfCards, &counter, &doubleMatch);
@@ -1580,7 +1580,7 @@ int main() {
 								currentCard = 2;
 							}
 						}
-						card_Matches(&currObj5, &headObj5, &lastObj5, &currObj3, &headObj3, &lastObj3, &currObj, &headObj, &lastObj, DeckOfCards, &singleMatch, &doubleMatch, &counter, &currentCard, turnCount, howMany, playerCount);
+						card_Matches(&currObj5, &headObj5, &lastObj5, &currObj3, &headObj3, &lastObj3, &currObj, &headObj, &lastObj, DeckOfCards, &singleMatch, &doubleMatch, &counter, &currentCard, turnCount + 1, howMany, playerCount);
 						if (doubleMatch > 0) {
 							printf("Dealing %d card(s) to other players.\n", doubleMatch);
 							card_Draw(currObj, headObj, lastObj, DeckOfCards, &counter, &doubleMatch);
@@ -1747,7 +1747,7 @@ int main() {
 						counter = counter - 1;
 						card_LastNode(&currObj5, &headObj5, &lastObj5);
 						printf("You drew the card %s %d.\n", lastObj5->color, lastObj5->value);
-						turnCount = 2;
+						turnCount = turnCount - 1;
 						currentCard = 1;
 					}
 				}
