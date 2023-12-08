@@ -11,12 +11,6 @@
 #define BLUE "\x1b[34m"
 #define RESET "\x1b[0m"
 
-// I mentioned this on piazza but my partner did not end up doing much until the day before it was due, and at that point I had already done basically all the code because I did not want to rely on him and he not get it done.
-// He does not have the new finalized code, but he does have an older version of it, so there may be some similarities between the two codes, so just keep that in mind please.
-// He may have still named me as a partner in his project though.
-// If you have any questions or need to contact me about anything email ahattab@arizona.edu
-
-// I only commented the first player because the code for the other 3 are the same but just repeated over using the variables for their linked lists, such as currObj2 for player 2, currObj4 for player 3, and currObj5 for player 4.
 
 typedef struct card_s {
 	char color[10];
